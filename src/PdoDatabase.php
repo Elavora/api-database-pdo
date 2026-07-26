@@ -9,6 +9,7 @@ use Elavora\Api\Framework\Contracts\TransactionManager;
 use InvalidArgumentException;
 use PDO;
 use PDOStatement;
+use RuntimeException;
 
 final class PdoDatabase implements TransactionManager
 {
@@ -77,7 +78,13 @@ final class PdoDatabase implements TransactionManager
     public function execute(string $sql, array $params = []): PDOStatement
     {
         $statement = $this->connection->prepare($sql);
-        $statement->execute($this->databaseValues($params));
+        if ($statement === false) {
+            throw new RuntimeException('Nao foi possivel preparar a consulta PDO.');
+        }
+
+        if (!$statement->execute($this->databaseValues($params))) {
+            throw new RuntimeException('Nao foi possivel executar a consulta PDO.');
+        }
 
         return $statement;
     }
@@ -90,7 +97,9 @@ final class PdoDatabase implements TransactionManager
      */
     public function fetchAll(string $sql, array $params = []): array
     {
-        return $this->execute($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $this->execute($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_values($rows);
     }
 
     /**
@@ -122,7 +131,10 @@ final class PdoDatabase implements TransactionManager
      * Monta e executa uma consulta SELECT simples.
      *
      * @param array<int, string>|string $columns
-     * @param array<string, mixed>|string|null $where
+     * @param array<array-key, mixed>|string|null $where
+     * @param string|null $orderBy Coluna ou expressao confiavel usada na ordenacao.
+     * @param int|null $limit Zero retorna uma lista vazia; valores negativos sao invalidos.
+     * @param string $orderDirection Direcao ASC ou DESC, sem outros fragmentos SQL.
      * @return list<array<string, mixed>>
      */
     public function select(
@@ -130,8 +142,18 @@ final class PdoDatabase implements TransactionManager
         array|string $columns = '*',
         array|string|null $where = null,
         ?string $orderBy = null,
-        int|string|null $limit = null
+        ?int $limit = null,
+        string $orderDirection = 'ASC'
     ): array {
+        if ($limit !== null && $limit < 0) {
+            throw new InvalidArgumentException('Limit PDO deve ser maior ou igual a zero.');
+        }
+
+        $orderDirection = strtoupper($orderDirection);
+        if (!in_array($orderDirection, ['ASC', 'DESC'], true)) {
+            throw new InvalidArgumentException('Direcao de ordenacao PDO deve ser ASC ou DESC.');
+        }
+
         $params = [];
         $sql = 'SELECT ' . $this->columnsSql($columns) . " FROM $table";
         $whereSql = $this->whereSql($where, $params);
@@ -141,10 +163,10 @@ final class PdoDatabase implements TransactionManager
         }
 
         if ($orderBy !== null && $orderBy !== '') {
-            $sql .= " ORDER BY $orderBy";
+            $sql .= " ORDER BY $orderBy $orderDirection";
         }
 
-        if ($limit !== null && $limit !== '') {
+        if ($limit !== null) {
             $sql .= " LIMIT $limit";
         }
 
@@ -176,14 +198,19 @@ final class PdoDatabase implements TransactionManager
 
         $this->execute($sql, $data);
 
-        return $this->connection->lastInsertId();
+        $id = $this->connection->lastInsertId();
+        if ($id === false) {
+            throw new RuntimeException('O driver PDO nao retornou o identificador inserido.');
+        }
+
+        return $id;
     }
 
     /**
      * Atualiza linhas que batem com a condicao.
      *
      * @param array<string, mixed> $data
-     * @param array<string, mixed>|string $where
+     * @param array<array-key, mixed>|string $where
      */
     public function update(string $table, array $data, array|string $where): int
     {
@@ -213,7 +240,7 @@ final class PdoDatabase implements TransactionManager
     /**
      * Remove linhas que batem com a condicao.
      *
-     * @param array<string, mixed>|string $where
+     * @param array<array-key, mixed>|string $where
      */
     public function delete(string $table, array|string $where): int
     {
@@ -227,7 +254,7 @@ final class PdoDatabase implements TransactionManager
     /**
      * Verifica se existe ao menos uma linha para a condicao.
      *
-     * @param array<string, mixed>|string|null $where
+     * @param array<array-key, mixed>|string|null $where
      */
     public function exists(string $table, array|string|null $where = null): bool
     {
@@ -238,6 +265,9 @@ final class PdoDatabase implements TransactionManager
         return $this->value($sql, $params) !== null;
     }
 
+    /**
+     * @param array<int, string>|string $columns
+     */
     private function columnsSql(array|string $columns): string
     {
         if (is_string($columns)) {
@@ -251,6 +281,10 @@ final class PdoDatabase implements TransactionManager
         return implode(', ', $columns);
     }
 
+    /**
+     * @param array<array-key, mixed>|string|null $where
+     * @param array<string, mixed> $params
+     */
     private function whereSql(array|string|null $where, array &$params): string
     {
         if ($where === null || $where === []) {
@@ -274,6 +308,11 @@ final class PdoDatabase implements TransactionManager
             }
 
             if (is_array($value)) {
+                if ($value === []) {
+                    $parts[] = '1 = 0';
+                    continue;
+                }
+
                 $placeholders = [];
                 foreach (array_values($value) as $index => $item) {
                     $placeholder = 'where_' . $column . '_' . $index;
