@@ -8,3 +8,5 @@ Registre `PdoExtension` com `dsn`, `username`, `password` e `options`, ou use
 Ao registrar a extensao, o container tambem recebe `PdoDatabase`, com metodos
 para `execute`, `fetch`, `fetchAll`, `value`, `select`, `insert`, `update`,
 `delete` e `exists`.
+
+O pacote requer PHP 8.3 ou superior e `elavora/api-framework` 1.x.

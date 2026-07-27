@@ -40,9 +40,17 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
         return $this->connections[$connectionName];
     }
 
+    /**
+     * @return array{
+     *     dsn: string,
+     *     username: string|null,
+     *     password: string|null,
+     *     options: array<int, mixed>
+     * }
+     */
     private function connectionConfig(?string $name): array
     {
-        if (isset($this->config['dsn'])) {
+        if (!array_key_exists('connections', $this->config)) {
             if ($name !== null && $name !== 'default') {
                 throw new InvalidArgumentException("Conexao PDO '$name' nao esta configurada.");
             }
@@ -60,12 +68,47 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
         return $this->validatedConfig($connection);
     }
 
+    /**
+     * @param array<string, mixed> $config
+     * @return array{
+     *     dsn: string,
+     *     username: string|null,
+     *     password: string|null,
+     *     options: array<int, mixed>
+     * }
+     */
     private function validatedConfig(array $config): array
     {
         if (!isset($config['dsn']) || !is_string($config['dsn']) || $config['dsn'] === '') {
             throw new InvalidArgumentException('A configuracao PDO deve informar um DSN valido.');
         }
 
-        return $config;
+        $username = $config['username'] ?? null;
+        if ($username !== null && !is_string($username)) {
+            throw new InvalidArgumentException('O username PDO deve ser uma string ou null.');
+        }
+
+        $password = $config['password'] ?? null;
+        if ($password !== null && !is_string($password)) {
+            throw new InvalidArgumentException('O password PDO deve ser uma string ou null.');
+        }
+
+        $options = $config['options'] ?? [];
+        if (!is_array($options)) {
+            throw new InvalidArgumentException('As options PDO devem ser um array.');
+        }
+
+        foreach (array_keys($options) as $attribute) {
+            if (!is_int($attribute)) {
+                throw new InvalidArgumentException('As chaves de options PDO devem ser inteiros.');
+            }
+        }
+
+        return [
+            'dsn' => $config['dsn'],
+            'username' => $username,
+            'password' => $password,
+            'options' => $options,
+        ];
     }
 }
