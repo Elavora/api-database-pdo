@@ -87,8 +87,8 @@ final class PdoDriverCompatibilityTest extends TestCase
         if (is_string($mysqlDsn) && $mysqlDsn !== '') {
             yield 'mysql' => new PDO(
                 $mysqlDsn,
-                getenv('PDO_MYSQL_USER') ?: null,
-                getenv('PDO_MYSQL_PASSWORD') ?: null,
+                getenv('PDO_MYSQL_USER') ?: getenv('MYSQL_USERNAME') ?: null,
+                getenv('PDO_MYSQL_PASSWORD') ?: getenv('MYSQL_PASSWORD') ?: null,
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
             );
         }
@@ -97,8 +97,8 @@ final class PdoDriverCompatibilityTest extends TestCase
         if (is_string($postgresDsn) && $postgresDsn !== '') {
             yield 'pgsql' => new PDO(
                 $postgresDsn,
-                getenv('PDO_POSTGRES_USER') ?: null,
-                getenv('PDO_POSTGRES_PASSWORD') ?: null,
+                getenv('PDO_POSTGRES_USER') ?: getenv('POSTGRES_USERNAME') ?: null,
+                getenv('PDO_POSTGRES_PASSWORD') ?: getenv('POSTGRES_PASSWORD') ?: null,
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
             );
         }
