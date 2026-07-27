@@ -50,7 +50,7 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
      */
     private function connectionConfig(?string $name): array
     {
-        if (isset($this->config['dsn'])) {
+        if (!array_key_exists('connections', $this->config)) {
             if ($name !== null && $name !== 'default') {
                 throw new InvalidArgumentException("Conexao PDO '$name' nao esta configurada.");
             }
