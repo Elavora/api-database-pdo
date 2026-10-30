@@ -16,9 +16,7 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
     /**
      * @param array<string, mixed> $config Configuracao PDO unica ou mapa de conexoes.
      */
-    public function __construct(private readonly array $config)
-    {
-    }
+    public function __construct(private readonly array $config) {}
 
     /**
      * Retorna uma conexao PDO reutilizada pelo nome informado.
@@ -33,7 +31,7 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
                 dsn: $config['dsn'],
                 username: $config['username'] ?? null,
                 password: $config['password'] ?? null,
-                options: $config['options'] ?? []
+                options: $config['options'] ?? [],
             );
         }
 

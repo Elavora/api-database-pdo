@@ -15,9 +15,7 @@ final class PdoDatabase implements TransactionManager
     /**
      * @param PDO $connection Conexao PDO reutilizada pelo banco.
      */
-    public function __construct(private readonly PDO $connection)
-    {
-    }
+    public function __construct(private readonly PDO $connection) {}
 
     /**
      * Retorna a conexao PDO interna.
@@ -130,7 +128,7 @@ final class PdoDatabase implements TransactionManager
         array|string $columns = '*',
         array|string|null $where = null,
         ?string $orderBy = null,
-        int|string|null $limit = null
+        int|string|null $limit = null,
     ): array {
         $params = [];
         $sql = 'SELECT ' . $this->columnsSql($columns) . " FROM $table";
@@ -164,7 +162,7 @@ final class PdoDatabase implements TransactionManager
 
         $data = $this->databaseValues($data);
         $columns = array_keys($data);
-        $placeholders = array_map(static fn (string $column): string => ':' . $column, $columns);
+        $placeholders = array_map(static fn(string $column): string => ':' . $column, $columns);
         $sql = "INSERT INTO $table (" . implode(', ', $columns) . ') VALUES (' . implode(', ', $placeholders) . ')';
 
         if ($returning !== null && $returning !== '' && $this->supportsReturning()) {

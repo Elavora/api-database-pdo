@@ -96,14 +96,14 @@ final class PdoExtensionTest extends TestCase
     {
         $container = Application::create()->extend(new PdoExtension([]))->container();
 
-        self::assertResolutionFails(static fn () => $container->get(PdoDatabase::class));
+        self::assertResolutionFails(static fn() => $container->get(PdoDatabase::class));
     }
 
     public function testInvalidConfigFailsWhenResolvingTransactionManager(): void
     {
         $container = Application::create()->extend(new PdoExtension([]))->container();
 
-        self::assertResolutionFails(static fn () => $container->get(TransactionManager::class));
+        self::assertResolutionFails(static fn() => $container->get(TransactionManager::class));
     }
 
     /**
