@@ -218,6 +218,28 @@ final class PdoDatabaseTest extends TestCase
         self::assertSame('1', $this->database->insert('users', ['name' => 'Ana'], 'id'));
     }
 
+    public function testInsertThrowsRuntimeExceptionWhenLastInsertIdReturnsFalse(): void
+    {
+        $pdo = new class ('sqlite::memory:') extends PDO {
+            public function lastInsertId(?string $name = null): string|false
+            {
+                return false;
+            }
+        };
+        $database = new PdoDatabase($pdo);
+        $database->execute('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)');
+
+        try {
+            $database->insert('users', ['name' => 'Ana']);
+            self::fail('Esperava RuntimeException quando lastInsertId() devolve false.');
+        } catch (RuntimeException $e) {
+            self::assertSame('Nao foi possivel obter o id gerado pelo insert PDO.', $e->getMessage());
+        }
+
+        // O insert ja foi executado quando a excecao e lancada.
+        self::assertSame(['name' => 'Ana'], $database->fetch('SELECT name FROM users'));
+    }
+
     public function testInsertWithEmptyDataThrows(): void
     {
         $this->expectException(InvalidArgumentException::class);
