@@ -9,6 +9,7 @@ use Elavora\Api\Framework\Contracts\TransactionManager;
 use InvalidArgumentException;
 use PDO;
 use PDOStatement;
+use RuntimeException;
 
 final class PdoDatabase implements TransactionManager
 {
@@ -88,7 +89,10 @@ final class PdoDatabase implements TransactionManager
      */
     public function fetchAll(string $sql, array $params = []): array
     {
-        return $this->execute($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
+        /** @var list<array<string, mixed>> $rows */
+        $rows = $this->execute($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
+
+        return $rows;
     }
 
     /**
@@ -174,13 +178,19 @@ final class PdoDatabase implements TransactionManager
 
         $this->execute($sql, $data);
 
-        return $this->connection->lastInsertId();
+        $id = $this->connection->lastInsertId();
+
+        if ($id === false) {
+            throw new RuntimeException('Nao foi possivel obter o id gerado pelo insert PDO.');
+        }
+
+        return $id;
     }
 
     /**
      * Atualiza linhas que batem com a condicao.
      *
-     * @param array<string, mixed> $data
+     * @param array<mixed> $data
      * @param array<string, mixed>|string $where
      */
     public function update(string $table, array $data, array|string $where): int
@@ -236,6 +246,9 @@ final class PdoDatabase implements TransactionManager
         return $this->value($sql, $params) !== null;
     }
 
+    /**
+     * @param array<int, string>|string $columns
+     */
     private function columnsSql(array|string $columns): string
     {
         if (is_string($columns)) {
@@ -249,6 +262,10 @@ final class PdoDatabase implements TransactionManager
         return implode(', ', $columns);
     }
 
+    /**
+     * @param array<mixed>|string|null $where
+     * @param array<string, mixed> $params
+     */
     private function whereSql(array|string|null $where, array &$params): string
     {
         if ($where === null || $where === []) {

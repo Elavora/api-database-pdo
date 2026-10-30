@@ -38,6 +38,9 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
         return $this->connections[$connectionName];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function connectionConfig(?string $name): array
     {
         if (isset($this->config['dsn'])) {
@@ -58,6 +61,10 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
         return $this->validatedConfig($connection);
     }
 
+    /**
+     * @param array<mixed> $config
+     * @return array<string, mixed>
+     */
     private function validatedConfig(array $config): array
     {
         if (!isset($config['dsn']) || !is_string($config['dsn']) || $config['dsn'] === '') {
