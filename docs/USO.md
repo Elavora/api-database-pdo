@@ -225,6 +225,9 @@ contendo `(1, 'Ana', 1)`, `(2, 'Bia', 0)` e `(3, 'Caio', 1)` em SQLite:
 - Gera `INSERT INTO <table> (<colunas>) VALUES (:<coluna>, ...)`.
 - Sem `returning`, ou com driver diferente de `pgsql`, devolve `PDO::lastInsertId()`
   (string; no SQLite, a primeira linha de uma tabela nova devolve `'1'`).
+- Se `PDO::lastInsertId()` devolver `false` (o driver não consegue informar o id gerado), lança
+  `RuntimeException` com `Nao foi possivel obter o id gerado pelo insert PDO.` (a mensagem é sem acentos).
+  O insert já foi executado nesse ponto. Antes, esse caso gerava um `TypeError` do tipo de retorno.
 - Com `returning` não vazio e driver `pgsql`, adiciona ` RETURNING <returning>` e devolve o valor
   da primeira coluna (int ou string; outros tipos viram string).
 
