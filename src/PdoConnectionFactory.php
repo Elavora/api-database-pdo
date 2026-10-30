@@ -16,9 +16,7 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
     /**
      * @param array<string, mixed> $config Configuracao PDO unica ou mapa de conexoes.
      */
-    public function __construct(private readonly array $config)
-    {
-    }
+    public function __construct(private readonly array $config) {}
 
     /**
      * Retorna uma conexao PDO reutilizada pelo nome informado.
@@ -33,13 +31,16 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
                 dsn: $config['dsn'],
                 username: $config['username'] ?? null,
                 password: $config['password'] ?? null,
-                options: $config['options'] ?? []
+                options: $config['options'] ?? [],
             );
         }
 
         return $this->connections[$connectionName];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function connectionConfig(?string $name): array
     {
         if (isset($this->config['dsn'])) {
@@ -60,6 +61,10 @@ final class PdoConnectionFactory implements DatabaseConnectionFactory
         return $this->validatedConfig($connection);
     }
 
+    /**
+     * @param array<mixed> $config
+     * @return array<string, mixed>
+     */
     private function validatedConfig(array $config): array
     {
         if (!isset($config['dsn']) || !is_string($config['dsn']) || $config['dsn'] === '') {

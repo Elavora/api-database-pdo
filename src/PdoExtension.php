@@ -15,9 +15,7 @@ final class PdoExtension implements Extension
     /**
      * @param array<string, mixed> $config Configuracao PDO unica ou mapa de conexoes.
      */
-    public function __construct(private readonly array $config)
-    {
-    }
+    public function __construct(private readonly array $config) {}
 
     /**
      * Registra factory PDO, banco padrao e gerenciador de transacao.
@@ -28,19 +26,27 @@ final class PdoExtension implements Extension
 
         $application->container()->bind(
             DatabaseConnectionFactory::class,
-            $factory
+            $factory,
         );
 
         $application->container()->bind(
             PdoDatabase::class,
-            static fn (Container $container): PdoDatabase => new PdoDatabase(
-                connection: $container->get(DatabaseConnectionFactory::class)->connection()
-            )
+            static function (Container $container): PdoDatabase {
+                /** @var DatabaseConnectionFactory $factory */
+                $factory = $container->get(DatabaseConnectionFactory::class);
+
+                return new PdoDatabase(connection: $factory->connection());
+            },
         );
 
         $application->container()->bind(
             TransactionManager::class,
-            static fn (Container $container): TransactionManager => $container->get(PdoDatabase::class)
+            static function (Container $container): TransactionManager {
+                /** @var PdoDatabase $database */
+                $database = $container->get(PdoDatabase::class);
+
+                return $database;
+            },
         );
     }
 }
