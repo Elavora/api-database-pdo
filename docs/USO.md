@@ -12,14 +12,14 @@ e `elavora/api-database-sqlite`. Ele não conhece nenhum driver específico: rec
 | Versão deste pacote | **1.0.0** (sai do PR com label `upgrade`, que sobe a major a partir da `v0.2.0`) |
 | Restrição que os dependentes devem usar | `"elavora/api-database-pdo": "^1.0"` |
 | `elavora/api-framework` exigido | `^2.0` |
-| PHP exigido | `>=8.3` (o mesmo mínimo do framework 2.0) |
+| PHP exigido | `>=8.4` (o mesmo mínimo do framework 2.0) |
 | Extensão exigida | `ext-pdo` `*` |
 
 O `composer.json` do pacote declara exatamente:
 
 ```json
 "require": {
-    "php": ">=8.3",
+    "php": ">=8.4",
     "ext-pdo": "*",
     "elavora/api-framework": "^2.0"
 }
@@ -303,7 +303,7 @@ Os testes usam SQLite em memória (`sqlite::memory:`), então não precisam de b
 Rode no container da organização, pelo PowerShell, montando o repo em `/origem`:
 
 ```powershell
-docker run --rm -v "${PWD}:/origem:ro" ghcr.io/elavora/php-dev:8.3-latest sh -c "cp -r /origem /tmp/w && cd /tmp/w && composer install --no-interaction && composer validate --strict --no-check-publish && vendor/bin/phpunit"
+docker run --rm -v "${PWD}:/origem:ro" ghcr.io/elavora/php-dev:8.4-latest sh -c "cp -r /origem /tmp/w && cd /tmp/w && composer install --no-interaction && composer validate --strict --no-check-publish && vendor/bin/phpunit"
 ```
 
 ## Observações

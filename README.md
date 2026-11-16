@@ -10,7 +10,7 @@ Fábrica de conexões PDO e helper simples de consultas para o framework Elavora
 É a base de `api-database-mysql`, `api-database-postgresql` e `api-database-sqlite`.
 
 - Versão: **1.0.0**. Dependentes devem exigir `"elavora/api-database-pdo": "^1.0"`.
-- Exige `elavora/api-framework` `^3.0`, PHP `>=8.3` e `ext-pdo`.
+- Exige `elavora/api-framework` `^4.1`, PHP `>=8.4` e `ext-pdo`.
 
 Registre `PdoExtension` com `dsn`, `username`, `password` e `options`, ou use
 `connections` para configurar várias conexões nomeadas.
@@ -28,15 +28,15 @@ A especificação completa, com regras e exemplos, está em [docs/USO.md](docs/U
 composer require elavora/api-database-pdo
 ```
 
-Requisitos: PHP 8.3 ou superior, `ext-pdo` e `elavora/api-framework` `^3.0`.
+Requisitos: PHP 8.4 ou superior, `ext-pdo` e `elavora/api-framework` `^4.1`.
 
 ## Desenvolvimento e testes
 
-Você só precisa de Docker. O ambiente é a imagem `ghcr.io/elavora/php-dev:8.3-latest`: abra o repositório no VS Code
+Você só precisa de Docker. O ambiente é a imagem `ghcr.io/elavora/php-dev:8.4-latest`: abra o repositório no VS Code
 com **Dev Containers: Reopen in Container**, ou rode no PowerShell:
 
 ```powershell
-docker run --rm --mount "type=bind,source=$($PWD.Path),target=/workspace" -w /workspace ghcr.io/elavora/php-dev:8.3-latest sh -lc 'git config --global --add safe.directory /workspace && composer install --no-interaction --prefer-dist && composer check'
+docker run --rm --mount "type=bind,source=$($PWD.Path),target=/workspace" -w /workspace ghcr.io/elavora/php-dev:8.4-latest sh -lc 'git config --global --add safe.directory /workspace && composer install --no-interaction --prefer-dist && composer check'
 ```
 
 Scripts do Composer:
