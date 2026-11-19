@@ -24,7 +24,7 @@ final class ComposerJsonTest extends TestCase
             [
                 'php' => '>=8.4',
                 'ext-pdo' => '*',
-                'elavora/api-framework' => '^4.1',
+                'elavora/api-framework' => '^4.1 || ^5.0 || ^6.0',
             ],
             self::composer()['require'] ?? null,
         );
